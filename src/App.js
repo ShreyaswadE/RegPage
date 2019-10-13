@@ -54,7 +54,9 @@ class App extends React.Component {
 			phoneNo: null,
 			emailId: "",
 			password: "",
-			reEnteredPassword: "",
+      reEnteredPassword: "",
+      firstNameEntered: false,
+      lastNameEntered : false,
 			phoneValidate: false,
 			emailValidate: false,
 			passwordValidate: false,
@@ -66,30 +68,51 @@ class App extends React.Component {
 		this.phoneNoChange = this.phoneNoChange.bind(this);
 		this.emailChange = this.emailChange.bind(this);
 		this.passwordEntered = this.passwordEntered.bind(this);
-		this.passwordReEntered = this.passwordReEntered.bind(this);
+    this.passwordReEntered = this.passwordReEntered.bind(this);
+    this.passwordCompare = this.passwordCompare.bind(this);
 		this.validateAllFields = this.validateAllFields.bind(this);
 	}
 
 	validateAllFields = () => {
-		this.setState({
-			validated:
-				this.state.phoneValidate &&
-				this.state.emailValidate &&
-				this.state.passwordValidate &&
-				this.state.reEnteredPasswordValidate
-		});
+    return (
+			this.state.firstNameEntered &&
+			this.state.lastNameEntered &&
+			this.state.phoneValidate &&
+			this.state.emailValidate &&
+			this.state.passwordValidate &&
+			this.state.reEnteredPasswordValidate
+		);
 	};
 
 	firstNameChange = e => {
 		this.setState({
 			firstName: e.target.value
-		});
+    });
+    if (e.target.value.length > 0) {
+      this.setState({
+        firstNameEntered : true
+      })
+    }
+    else {
+      this.setState({
+				firstNameEntered: false
+			});
+    }
 	};
 
 	lastNameChange = e => {
 		this.setState({
 			lastName: e.target.value
-		});
+    });
+    if (e.target.value.length > 0) {
+			this.setState({
+				lastNameEntered: true
+			});
+		} else {
+			this.setState({
+				lastNameEntered: false
+			});
+		}
 	};
 
 	phoneNoChange = e => {
@@ -100,15 +123,14 @@ class App extends React.Component {
 		if (!isNaN(e.target.value) && e.target.value.length === 10) {
 			this.setState({
 				phoneValidate: true
-			});
-			console.log("phone is validated");
+      });
+      
 		} else {
 			this.setState({
 				phoneValidate: false
-			});
-			console.log("phone is NOT validated");
+      });
+      
 		}
-		this.validateAllFields();
 	};
 
 	emailChange = e => {
@@ -117,22 +139,19 @@ class App extends React.Component {
 		});
 		if (
 			e.target.value.includes("@") &&
-			(e.target.value.includes(".com") || e.target.value.includes(".in"))
+			(e.target.value.endsWith(".com") || e.target.value.endsWith(".in"))
 		) {
 			this.setState({ emailValidate: true });
-			console.log("email is validated");
 		} else {
 			this.setState({ emailValidate: false });
-			console.log("email is NOT validated");
 		}
-		this.validateAllFields();
 	};
 
 	passwordEntered = e => {
 		this.setState({
 			password: e.target.value
 		});
-		if (e.target.value.length > 0 && e.target.value.length < 7) {
+		if (e.target.value.length <= 7) {
 			this.setState({
 				passwordValidate: false
 			});
@@ -140,40 +159,32 @@ class App extends React.Component {
 			this.setState({
 				passwordValidate: true
 			});
-			console.log("passo2wrd validated");
-		}
-		this.validateAllFields();
+    }
+    this.passwordCompare(e.target.value , this.state.reEnteredPassword);
 	};
 
-	//onSubmit () todo : write logic of onsubmit
+  passwordCompare(password, reEnteredPassword) {
+    if (password === reEnteredPassword && password.length > 7 ) {
+      this.setState({
+        reEnteredPasswordValidate : true
+      })
+    }
+    else {
+      this.setState({
+				reEnteredPasswordValidate: false
+			});
+    }
+  }
 
 	passwordReEntered = e => {
-		//todo : some logical tweaks here.
 		this.setState({
 			reEnteredPassword: e.target.value
-		});
-		if (this.state.password === this.state.reEnteredPassword) {
-			this.setState({
-				reEnteredPasswordValidate: true
-			});
-			console.log("reentered passwrod match");
-		} else {
-			this.setState({
-				reEnteredPasswordValidate: true
-			});
-		}
-
-		this.validateAllFields();
+    });
+    this.passwordCompare(this.state.password, e.target.value);
 	};
 
 	render() {
-		console.log(
-			"phone, email, pass, renter",
-			this.state.phoneValidate,
-			this.state.emailValidate,
-			this.state.passwordValidate,
-			this.state.reEnteredPasswordValidate
-		);
+    let allFieldsAppropriate = this.validateAllFields();
 		return (
 			<>
 				<div className="notice">All the fields are compulsory</div>
@@ -204,12 +215,11 @@ class App extends React.Component {
 						callBackFunction={this.passwordReEntered}
 						validate={this.state.reEnteredPasswordValidate}
 					/>
-					<button className="submit-button" disabled={!this.state.validated}>
-						{" "}
-						Submit{" "}
+					<button className="submit-button" disabled={!allFieldsAppropriate}>
+						Submit
 					</button>
-					{this.state.validated ? (
-						<div>Submitted successfully</div>
+					{allFieldsAppropriate ? (
+						<div>Click on the Submit button</div>
 					) : (
 						<div>
 							All the values are not entered correctly. Please enter all values
